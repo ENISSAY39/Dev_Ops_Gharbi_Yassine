@@ -1,4 +1,11 @@
 FROM httpd:2.4
 
-COPY httpd.conf /usr/local/apache2/conf/httpd.conf
+RUN apt-get update && apt-get install -y gettext
+
+COPY httpd.conf.template /tmp/httpd.conf.template
+COPY entrypoint.sh /entrypoint.sh
 COPY index.html /usr/local/apache2/htdocs/
+
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
