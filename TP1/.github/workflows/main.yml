@@ -1,3 +1,4 @@
+
 on:
   push:
     branches:
@@ -20,4 +21,5 @@ jobs:
           java-version: '21'
 
       - name: Build and test with Maven
+        working-directory: simple-api-student
         run: mvn clean verify
