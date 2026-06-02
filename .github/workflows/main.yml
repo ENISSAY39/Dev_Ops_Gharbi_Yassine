@@ -20,5 +20,5 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Build and test with Maven
+      - name: Finally build your app with the latest command and run tests with 
         run: mvn clean install --file TP1/simple-api-student/pom.xml
