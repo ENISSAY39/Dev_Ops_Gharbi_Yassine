@@ -22,4 +22,4 @@ jobs:
 
       - name: Build and test with Maven
         working-directory: simple-api-student
-        run: mvn clean verify
+        run: mvn clean verify --file TP1/simple-api-student/pom.xml
