@@ -22,4 +22,4 @@ jobs:
           java-version: 21
 
       - name: Finally build your app with the latest command and run tests with 
-        run: mvn clean verify --file TP1/simple-api-student/pom.xml
+        run: cd TP1/simple-api-student && mvn clean verify 
