@@ -1,4 +1,4 @@
-# Dev_Ops_Gharbi_Yassine
+# Dev_Ops_Gharbi_Yassine TP1
 
 ## 1-1 Why is it better to use the `-e` flag (environment variables) rather than hardcode values in the Dockerfile?
 
@@ -317,3 +317,24 @@ In professional environments, image registries act as the single source of truth
 
 
 test si ça marche 
+
+# Dev_Ops_Gharbi_Yassine TP2
+
+Pour un rapport README :
+
+## 2.1 What are Testcontainers?
+
+Testcontainers is an open-source Java library that allows developers to run lightweight, disposable Docker containers during automated tests. It automatically starts and stops the required services (such as PostgreSQL, MySQL, Redis, or Kafka) before and after test execution.
+
+Using Testcontainers ensures that integration tests run in an isolated and reproducible environment without requiring a manually configured database or external service. This improves test reliability and consistency across different development machines and CI/CD pipelines.
+
+In this project, Testcontainers is used to create a temporary PostgreSQL database for integration tests. The application connects to this containerized database during test execution, allowing the tests to validate the application's behavior in conditions close to a real production environment.
+
+**Benefits of Testcontainers:**
+
+* Provides realistic integration testing environments.
+* Eliminates dependency on locally installed services.
+* Ensures consistent test execution across developers' machines and CI servers.
+* Automatically manages container lifecycle (startup and cleanup).
+* Integrates seamlessly with Docker and Maven-based projects.
+
