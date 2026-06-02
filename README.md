@@ -350,3 +350,14 @@ Using secured variables improves security because:
 * If a secret needs to be changed, it can be updated without modifying the application code.
 
 In a CI/CD context, secured variables allow the pipeline to access resources (databases, cloud services, deployment servers, etc.) while keeping credentials confidential and reducing the risk of accidental leaks.
+
+
+
+## 2-3 Why did we put needs: test-backend on this job?
+
+The `needs: test-backend` directive ensures that the Docker image build job is executed only after the backend compilation and tests have completed successfully. This prevents building Docker images from code that does not compile or contains failing tests. It also optimizes the CI/CD pipeline by stopping the workflow early when an error is detected during the testing phase. Without this dependency, Docker images could be built from unstable or broken code, leading to unreliable deployments.
+
+
+## 2-4 
+
+Docker images are pushed to Docker Hub in order to store and distribute application versions through a central registry. By publishing images, developers and deployment servers can easily download and run the exact same application version. This ensures consistency between development, testing, and production environments. It also enables Continuous Delivery by making the latest validated version of the application automatically available after each successful build.

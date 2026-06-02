@@ -22,9 +22,8 @@ jobs:
           java-version: 21
 
       - name: Build and test backend
-        run: |
-          cd TP1/simple-api-student
-          mvn clean verify
+        run: cd TP1/simple-api-student && mvn -B verify sonar:sonar -Dsonar.projectKey=ENISSAY39_Dev_Ops_Gharbi_Yassine -Dsonar.organization=enissay39 -Dsonar.host.url=https://sonarcloud.io -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+          
 
   build-and-push-docker-image:
     needs: test-backend
