@@ -40,7 +40,7 @@ jobs:
       - name: SonarCloud analysis
         run: cd TP1/simple-api-student && mvn -B clean verify sonar:sonar -Dsonar.projectKey=ENISSAY39_Dev_Ops_Gharbi_Yassine -Dsonar.organization=enissay39 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-  build-and-push-docker-image:
+  build-and-push-backend:
     needs: sonar-analysis
     runs-on: ubuntu-24.04
 
@@ -57,12 +57,32 @@ jobs:
           tags: yassinegharbi2627/simple-api:1.0
           push: ${{ github.ref == 'refs/heads/main' }}
 
+  build-and-push-database:
+    needs: sonar-analysis
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.TOKEN_DOCKER }}" | docker login --username ${{ secrets.USER_NAME_DOCKER }} --password-stdin
+
       - name: Build image and push database
         uses: docker/build-push-action@v6
         with:
           context: ./TP1/database
           tags: yassinegharbi2627/database:1.0
           push: ${{ github.ref == 'refs/heads/main' }}
+
+  build-and-push-httpd:
+    needs: sonar-analysis
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        run: echo "${{ secrets.TOKEN_DOCKER }}" | docker login --username ${{ secrets.USER_NAME_DOCKER }} --password-stdin
 
       - name: Build image and push http
         uses: docker/build-push-action@v6
