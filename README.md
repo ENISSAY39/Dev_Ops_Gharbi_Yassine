@@ -314,3 +314,6 @@ Docker images are stored in an online registry to make them available from anywh
 - Centralized storage and distribution of application artifacts
 
 In professional environments, image registries act as the single source of truth for application releases.
+
+
+test si ça marche 
