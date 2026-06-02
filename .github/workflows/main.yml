@@ -11,7 +11,6 @@ on:
 jobs:
   test-backend:
     runs-on: ubuntu-24.04
-    environment: Docker
 
     steps:
       - uses: actions/checkout@v4
@@ -34,23 +33,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build backend image
+      - name: Login to DockerHub
+        run: echo "${{ secrets.TOKEN_DOCKER }}" | docker login --username ${{ secrets.USER_NAME_DOCKER }} --password-stdin
+
+      - name: Build image and push backend
         uses: docker/build-push-action@v6
         with:
           context: ./TP1/simple-api-student
-          push: false
-          tags: yassinegharbi2627/simpleapi:1.0
+          tags: yassinegharbi2627/simple-api:1.0
+          push: ${{ github.ref == 'refs/heads/main' }}
 
-      - name: Build database image
+      - name: Build image and push database
         uses: docker/build-push-action@v6
         with:
           context: ./TP1/database
-          push: false
           tags: yassinegharbi2627/database:1.0
+          push: ${{ github.ref == 'refs/heads/main' }}
 
-      - name: Build httpd image
+      - name: Build image and push http
         uses: docker/build-push-action@v6
         with:
           context: ./TP1/http-server
-          push: false
           tags: yassinegharbi2627/httpd:1.0
+          push: ${{ github.ref == 'refs/heads/main' }}
