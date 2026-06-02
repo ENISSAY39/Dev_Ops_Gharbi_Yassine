@@ -320,7 +320,7 @@ test si ça marche
 
 # Dev_Ops_Gharbi_Yassine TP2
 
-Pour un rapport README :
+
 
 ## 2.1 What are Testcontainers?
 
@@ -338,3 +338,15 @@ In this project, Testcontainers is used to create a temporary PostgreSQL databas
 * Automatically manages container lifecycle (startup and cleanup).
 * Integrates seamlessly with Docker and Maven-based projects.
 
+## 2-2 For what purpose do we need to use secured variables?
+
+Secured variables are used to store sensitive information such as passwords, API keys, database credentials, and access tokens without exposing them in the source code or repository.
+
+Using secured variables improves security because:
+
+* Secrets are not visible in the project files or Git history.
+* Different values can be used for development, testing, and production environments.
+* Access to sensitive data can be restricted to authorized users and CI/CD pipelines.
+* If a secret needs to be changed, it can be updated without modifying the application code.
+
+In a CI/CD context, secured variables allow the pipeline to access resources (databases, cloud services, deployment servers, etc.) while keeping credentials confidential and reducing the risk of accidental leaks.

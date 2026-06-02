@@ -22,5 +22,35 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - name: Finally build your app with the latest command and run tests with 
-        run: cd TP1/simple-api-student && mvn clean verify 
+      - name: Build and test backend
+        run: |
+          cd TP1/simple-api-student
+          mvn clean verify
+
+  build-and-push-docker-image:
+    needs: test-backend
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP1/simple-api-student
+          push: false
+          tags: yassinegharbi2627/simpleapi:1.0
+
+      - name: Build database image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP1/database
+          push: false
+          tags: yassinegharbi2627/database:1.0
+
+      - name: Build httpd image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./TP1/http-server
+          push: false
+          tags: yassinegharbi2627/httpd:1.0
