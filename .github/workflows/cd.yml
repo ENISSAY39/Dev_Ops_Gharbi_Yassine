@@ -23,7 +23,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1/simple-api-student
-          tags: yassinegharbi2627/simple-api:1.0
+          tags: |
+            yassinegharbi2627/simple-api:latest
+            yassinegharbi2627/simple-api:${{ github.run_number }}
           push: true
 
   build-and-push-database:
@@ -40,7 +42,9 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1/database
-          tags: yassinegharbi2627/database:1.0
+          tags: |
+            yassinegharbi2627/database:latest
+            yassinegharbi2627/database:${{ github.run_number }}
           push: true
 
   build-and-push-httpd:
@@ -57,5 +61,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1/http-server
-          tags: yassinegharbi2627/httpd:1.0
+          tags: |
+            yassinegharbi2627/httpd:latest
+            yassinegharbi2627/httpd:${{ github.run_number }}
           push: true
