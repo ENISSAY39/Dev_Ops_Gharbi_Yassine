@@ -361,3 +361,5 @@ The `needs: test-backend` directive ensures that the Docker image build job is e
 ## 2-4 
 
 Docker images are pushed to Docker Hub in order to store and distribute application versions through a central registry. By publishing images, developers and deployment servers can easily download and run the exact same application version. This ensures consistency between development, testing, and production environments. It also enables Continuous Delivery by making the latest validated version of the application automatically available after each successful build.
+
+
