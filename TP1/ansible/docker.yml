@@ -3,17 +3,9 @@
   gather_facts: true
   become: true
 
-  vars:
-    postgres_db: db
-    postgres_user: usr
-    postgres_password: pwd
-
-    spring_datasource_url: jdbc:postgresql://database:5432/db
-    spring_datasource_username: usr
-    spring_datasource_password: pwd
-
-    backend_host: simpleapi
-    backend_port: "8080"
+  vars_files:
+    - vars.yml
+    
 
   roles:
     - docker
