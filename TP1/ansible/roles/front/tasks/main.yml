@@ -1,0 +1,11 @@
+---
+- name: Launch frontend
+  community.docker.docker_container:
+    name: front
+    image: yassinegharbi2627/front:latest
+    pull : true
+    state: started
+    recreate: true
+
+    networks:
+      - name: front-network

@@ -3,6 +3,7 @@
   community.docker.docker_container:
     name: simpleapi
     image: yassinegharbi2627/simpleapi:1.0
+    pull : true
     state: started
     recreate: true
 

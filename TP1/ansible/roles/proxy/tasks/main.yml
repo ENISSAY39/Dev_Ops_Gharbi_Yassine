@@ -2,9 +2,11 @@
 - name: Launch Apache proxy
   community.docker.docker_container:
     name: apache
-    image: yassinegharbi2627/httpd:1.0
+    image: yassinegharbi2627/httpd:latest
+    pull : true
     state: started
     recreate: true
+    
 
     ports:
       - "80:80"

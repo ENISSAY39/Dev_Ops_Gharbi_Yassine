@@ -3,6 +3,7 @@
   community.docker.docker_container:
     name: database
     image: yassinegharbi2627/database:1.0
+    pull : true
     state: started
     recreate: true
 

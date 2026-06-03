@@ -552,7 +552,13 @@ SSLRandomSeed connect builtin
 </IfModule>
 
 <VirtualHost *:80>
+
     ProxyPreserveHost On
-    ProxyPass / http://${BACKEND_HOST}:${BACKEND_PORT}/
-    ProxyPassReverse / http://${BACKEND_HOST}:${BACKEND_PORT}/
+
+    ProxyPass /api/ http://simpleapi:8080/
+    ProxyPassReverse /api/ http://simpleapi:8080/
+
+    ProxyPass / http://front:80/
+    ProxyPassReverse / http://front:80/
+
 </VirtualHost>
