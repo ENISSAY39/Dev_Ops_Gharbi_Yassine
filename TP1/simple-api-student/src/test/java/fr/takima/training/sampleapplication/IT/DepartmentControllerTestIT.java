@@ -25,7 +25,7 @@ class DepartmentControllerTestIT {
     void testGetDepartmentByName() throws Exception {
         mockMvc.perform(get("/departments/ASI"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("id", equalTo(100)))
+                .andExpect(jsonPath("id", equalTo(1)))
                 .andExpect(jsonPath("name", equalTo("ASI")));
     }
 
