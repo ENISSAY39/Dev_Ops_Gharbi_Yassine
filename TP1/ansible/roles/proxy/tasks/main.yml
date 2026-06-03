@@ -1,3 +1,17 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# tasks file for roles/proxy
+- name: Launch Apache proxy
+  community.docker.docker_container:
+    name: apache
+    image: yassinegharbi2627/httpd:1.0
+    state: started
+    recreate: true
+
+    ports:
+      - "80:80"
+
+    env:
+      BACKEND_HOST: "{{ backend_host }}"
+      BACKEND_PORT: "{{ backend_port }}"
+
+    networks:
+      - name: front-network

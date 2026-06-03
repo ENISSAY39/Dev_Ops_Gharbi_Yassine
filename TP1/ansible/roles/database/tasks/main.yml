@@ -1,3 +1,15 @@
-#SPDX-License-Identifier: MIT-0
 ---
-# tasks file for roles/database
+- name: Launch PostgreSQL
+  community.docker.docker_container:
+    name: database
+    image: yassinegharbi2627/database:1.0
+    state: started
+    recreate: true
+
+    env:
+      POSTGRES_DB: "{{ postgres_db }}"
+      POSTGRES_USER: "{{ postgres_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+
+    networks:
+      - name: back-network

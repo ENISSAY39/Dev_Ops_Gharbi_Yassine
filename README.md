@@ -460,3 +460,112 @@ This confirms that Docker is correctly installed and running on the remote serve
 
 
 
+## 3-3 Document your docker_container tasks configuration
+
+The application deployment relies on the Ansible module `community.docker.docker_container`. This module allows containers to be created, configured and started directly from Ansible without using Docker Compose.
+
+### Database Container
+
+The PostgreSQL database container is deployed using:
+
+```yaml
+- name: Launch PostgreSQL
+  community.docker.docker_container:
+    name: database
+    image: yassinegharbi2627/database:1.0
+    state: started
+    recreate: true
+
+    env:
+      POSTGRES_DB: "{{ postgres_db }}"
+      POSTGRES_USER: "{{ postgres_user }}"
+      POSTGRES_PASSWORD: "{{ postgres_password }}"
+
+    networks:
+      - name: back-network
+```
+
+Configuration:
+
+* `name`: container name.
+* `image`: Docker image hosted on Docker Hub.
+* `state: started`: ensures the container is running.
+* `recreate: true`: recreates the container when configuration changes.
+* `env`: injects PostgreSQL environment variables.
+* `networks`: connects the container to the backend network.
+
+### Backend Container
+
+The Spring Boot application is deployed using:
+
+```yaml
+- name: Launch backend
+  community.docker.docker_container:
+    name: simpleapi
+    image: yassinegharbi2627/simpleapi:1.0
+    state: started
+    recreate: true
+
+    env:
+      SPRING_DATASOURCE_URL: "{{ spring_datasource_url }}"
+      SPRING_DATASOURCE_USERNAME: "{{ spring_datasource_username }}"
+      SPRING_DATASOURCE_PASSWORD: "{{ spring_datasource_password }}"
+
+    networks:
+      - name: front-network
+      - name: back-network
+```
+
+Configuration:
+
+* Environment variables are used to configure the database connection.
+* The container is attached to both networks:
+
+  * `back-network` to communicate with PostgreSQL.
+  * `front-network` to communicate with the reverse proxy.
+
+### Reverse Proxy Container
+
+The Apache reverse proxy is deployed using:
+
+```yaml
+- name: Launch Apache proxy
+  community.docker.docker_container:
+    name: apache
+    image: yassinegharbi2627/httpd:1.0
+    state: started
+    recreate: true
+
+    ports:
+      - "80:80"
+
+    env:
+      BACKEND_HOST: "{{ backend_host }}"
+      BACKEND_PORT: "{{ backend_port }}"
+
+    networks:
+      - name: front-network
+```
+
+Configuration:
+
+* Port `80` of the container is exposed on the host.
+* Environment variables define the backend target.
+* The proxy is connected to the frontend network only.
+
+### Deployment Architecture
+
+```text
+Client
+   |
+   v
+Apache Proxy (port 80)
+   |
+   v
+Spring Boot Application
+   |
+   v
+PostgreSQL Database
+```
+
+Using the `docker_container` module allows infrastructure and application deployment to be fully automated and reproducible through Ansible.

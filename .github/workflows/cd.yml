@@ -5,10 +5,9 @@ on:
     workflows: ["CI"]
     types:
       - completed
-    branches:
-      - main
 
 jobs:
+
   build-and-push-backend:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
@@ -23,10 +22,10 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1/simple-api-student
-          tags: |
-            yassinegharbi2627/simple-api:latest
-            yassinegharbi2627/simple-api:${{ github.run_number }}
           push: true
+          tags: |
+            yassinegharbi2627/simpleapi:latest
+            yassinegharbi2627/simpleapi:${{ github.run_number }}
 
   build-and-push-database:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -42,10 +41,10 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ./TP1/database
+          push: true
           tags: |
             yassinegharbi2627/database:latest
             yassinegharbi2627/database:${{ github.run_number }}
-          push: true
 
   build-and-push-httpd:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -57,11 +56,46 @@ jobs:
       - name: Login to DockerHub
         run: echo "${{ secrets.TOKEN_DOCKER }}" | docker login --username ${{ secrets.USER_NAME_DOCKER }} --password-stdin
 
-      - name: Build image and push http
+      - name: Build image and push httpd
         uses: docker/build-push-action@v6
         with:
           context: ./TP1/http-server
+          push: true
           tags: |
             yassinegharbi2627/httpd:latest
             yassinegharbi2627/httpd:${{ github.run_number }}
-          push: true
+
+  deploy:
+    needs:
+      - build-and-push-backend
+      - build-and-push-database
+      - build-and-push-httpd
+
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Install Docker collection
+        run: |
+          ansible-galaxy collection install community.docker
+
+      - name: Configure SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Add server to known_hosts
+        run: |
+          ssh-keyscan yassine.gharbi.takima.school >> ~/.ssh/known_hosts
+
+      - name: Deploy with Ansible
+        run: |
+          cd TP1/ansible
+          ansible-playbook -i inventories/setup.yml docker.yml
