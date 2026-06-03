@@ -1,4 +1,4 @@
-name: CD
+name: Continuous Delivery
 
 on:
   workflow_run:
@@ -73,53 +73,3 @@ jobs:
           tags: |
             yassinegharbi2627/httpd:latest
             yassinegharbi2627/httpd:${{ github.run_number }}
-
-  deploy:
-    needs:
-      - build-and-push-backend
-      - build-and-push-database
-      - build-and-push-httpd
-
-    runs-on: ubuntu-24.04
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Ansible
-        run: |
-          sudo apt update
-          sudo apt install -y ansible
-
-      - name: Install Docker collection
-        run: |
-          ansible-galaxy collection install community.docker
-
-      - name: Configure SSH key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-      - name: Add server to known_hosts
-        run: |
-          ssh-keyscan yassine.gharbi.takima.school >> ~/.ssh/known_hosts
-
-      - name: Create vars.yml from GitHub Secrets
-        run: |
-          cat > TP1/ansible/vars.yml << EOF
-          postgres_db: "${{ secrets.POSTGRES_DB }}"
-          postgres_user: "${{ secrets.POSTGRES_USER }}"
-          postgres_password: "${{ secrets.POSTGRES_PASSWORD }}"
-
-          spring_datasource_url: "${{ secrets.SPRING_DATASOURCE_URL }}"
-          spring_datasource_username: "${{ secrets.SPRING_DATASOURCE_USERNAME }}"
-          spring_datasource_password: "${{ secrets.SPRING_DATASOURCE_PASSWORD }}"
-
-          backend_host: "${{ secrets.BACKEND_HOST }}"
-          backend_port: "${{ secrets.BACKEND_PORT }}"
-          EOF
-
-      - name: Deploy with Ansible
-        run: |
-          cd TP1/ansible
-          ansible-playbook -i inventories/setup.yml docker.yml
