@@ -17,7 +17,12 @@ spring:
 management:
   server:
     add-application-context-header: false
+
   endpoints:
     web:
       exposure:
-        include: health,info,env,metrics,beans,configprops
+        include: health,info,env,metrics,beans,configprops,prometheus
+
+  endpoint:
+    health:
+      show-details: always
