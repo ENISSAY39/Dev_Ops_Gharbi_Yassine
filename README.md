@@ -363,5 +363,100 @@ The `needs: test-backend` directive ensures that the Docker image build job is e
 Docker images are pushed to Docker Hub in order to store and distribute application versions through a central registry. By publishing images, developers and deployment servers can easily download and run the exact same application version. This ensures consistency between development, testing, and production environments. It also enables Continuous Delivery by making the latest validated version of the application automatically available after each successful build.
 
 
+# Dev_Ops_Gharbi_Yassine TP3 Ansible 
+
+
+## 3-1 Document your inventory and base commands :
+
+Ansible modules are idempotent. Running the same command multiple times does not produce additional changes once the desired state has been reached. This behavior was verified by removing Apache2 twice: the first execution returned changed=true, while the second returned changed=false.
+
+## 3-2 Document your playbook
+
+### First Playbook
+
+A first playbook was created to validate connectivity between the Ansible control node and the remote server.
+
+```yaml
+- hosts: all
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Test connection
+      ping:
+```
+
+This playbook uses the Ansible `ping` module to verify that:
+
+* the remote host is reachable;
+* SSH authentication is working;
+* Ansible can execute commands on the target machine.
+
+It was executed with:
+
+```bash
+ansible-playbook -i inventories/setup.yml playbook.yml
+```
+
+### Docker Installation Playbook
+
+A second playbook was created to automate Docker installation on the remote server. The playbook performs the following tasks:
+
+* Install required dependencies.
+* Add Docker's official GPG key.
+* Configure the Docker APT repository.
+* Install Docker CE.
+* Install Python and pip.
+* Create a Python virtual environment.
+* Install the Docker Python SDK.
+* Ensure that the Docker service is running.
+
+### Refactoring with Roles
+
+To improve maintainability and reusability, the Docker installation tasks were moved into a dedicated Ansible role named `docker`.
+
+Project structure:
+
+```text
+ansible/
+├── inventories/
+│   └── setup.yml
+├── docker.yml
+└── roles/
+    └── docker/
+        ├── handlers/
+        │   └── main.yml
+        └── tasks/
+            └── main.yml
+```
+
+The main playbook simply calls the role:
+
+```yaml
+- hosts: all
+  gather_facts: true
+  become: true
+
+  roles:
+    - docker
+```
+
+### Verification
+
+The playbook was executed successfully and Docker installation was verified using:
+
+```bash
+ansible all -i inventories/setup.yml -a "docker --version"
+```
+
+Output:
+
+```text
+Docker version 29.5.2, build 79eb04c
+```
+
+This confirms that Docker is correctly installed and running on the remote server.
+
+
 
 
