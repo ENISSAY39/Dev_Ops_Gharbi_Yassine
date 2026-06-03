@@ -95,6 +95,21 @@ jobs:
         run: |
           ssh-keyscan yassine.gharbi.takima.school >> ~/.ssh/known_hosts
 
+      - name: Create vars.yml from GitHub Secrets
+        run: |
+          cat > TP1/ansible/vars.yml << EOF
+          postgres_db: "${{ secrets.POSTGRES_DB }}"
+          postgres_user: "${{ secrets.POSTGRES_USER }}"
+          postgres_password: "${{ secrets.POSTGRES_PASSWORD }}"
+
+          spring_datasource_url: "${{ secrets.SPRING_DATASOURCE_URL }}"
+          spring_datasource_username: "${{ secrets.SPRING_DATASOURCE_USERNAME }}"
+          spring_datasource_password: "${{ secrets.SPRING_DATASOURCE_PASSWORD }}"
+
+          backend_host: "${{ secrets.BACKEND_HOST }}"
+          backend_port: "${{ secrets.BACKEND_PORT }}"
+          EOF
+
       - name: Deploy with Ansible
         run: |
           cd TP1/ansible
