@@ -2,7 +2,7 @@
 - name: Create front network
   community.docker.docker_network:
     name: front-network
-    pull : true
+
    
 
 
