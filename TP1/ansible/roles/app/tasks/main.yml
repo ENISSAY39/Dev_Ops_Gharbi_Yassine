@@ -2,7 +2,7 @@
 - name: Launch backend
   community.docker.docker_container:
     name: simpleapi
-    image: yassinegharbi2627/simpleapi:1.0
+    image: yassinegharbi2627/simpleapi:latest
     pull : true
     state: started
     recreate: true
