@@ -842,12 +842,61 @@ This confirms that Prometheus successfully collects metrics from the application
 
 
 
+## Limitations Encountered
 
+During the monitoring implementation, the Prometheus and Grafana stack was successfully deployed and validated.
 
-admin@ip-10-0-1-208:~$ sudo dmesg -T | grep -i -E "killed process|out of memory|oom"
-[Thu Jun  4 06:45:13 2026] systemd invoked oom-killer: gfp_mask=0x140cca(GFP_HIGHUSER_MOVABLE|__GFP_COMP), order=0, oom_score_adj=0
-[Thu Jun  4 06:45:13 2026]  oom_kill_process.cold+0xb/0x10
-[Thu Jun  4 06:45:13 2026] [  pid  ]   uid  tgid total_vm      rss pgtables_bytes swapents oom_score_adj name
-[Thu Jun  4 06:45:13 2026] oom-kill:constraint=CONSTRAINT_NONE,nodemask=(null),cpuset=init.scope,mems_allowed=0,global_oom,task_memcg=/system.slice/docker-80f376d3b62b871b9d07ff59217a77c350fb30019af83b141fab0209b8c22f15.scope,task=java,pid=56720,uid=0
-[Thu Jun  4 06:45:14 2026] Out of memory: Killed process 56720 (java) total-vm:1917040kB, anon-rss:249788kB, file-rss:0kB, shmem-rss:0kB, UID:0 pgtables:736kB oom_score_adj:0
-admin@ip-10-0-1-208:~$
+### VM Resource Limitation
+
+The educational AWS VM provided for the project only offers approximately **1 GB of RAM** and does not have any swap memory configured.
+
+After several hours of execution with the following services running simultaneously:
+
+* PostgreSQL
+* Spring Boot Backend
+* Apache HTTP Server
+* Nginx Frontend
+* Prometheus
+* Grafana
+
+the Linux OOM Killer terminated the Java backend process due to memory exhaustion.
+
+Evidence collected on the VM:
+
+```bash
+sudo dmesg -T | grep -i -E "killed process|out of memory|oom"
+```
+
+Output:
+
+```text
+[Thu Jun  4 06:45:13 2026] systemd invoked oom-killer
+[Thu Jun  4 06:45:13 2026] oom-kill: task=java,pid=56720
+[Thu Jun  4 06:45:14 2026] Out of memory: Killed process 56720 (java)
+```
+
+This confirms that the backend application was terminated by the Linux kernel because of insufficient available memory.
+
+### Network Restrictions
+
+Although Prometheus and Grafana were successfully deployed on the VM, their web interfaces could not be accessed directly from the Internet.
+
+The ports used by these services:
+
+* Grafana: `3000`
+* Prometheus: `9090`
+
+were not exposed through the infrastructure firewall/security configuration managed by the teaching team.
+
+As a result:
+
+* Local verification on the VM was successful using `curl`.
+* Prometheus successfully scraped the Spring Boot metrics endpoint.
+* Grafana and Prometheus were also deployed and tested locally on a workstation using Docker.
+* Direct access through `http://<vm-host>:3000` and `http://<vm-host>:9090` was not possible from outside the VM.
+
+Despite these infrastructure limitations, the monitoring stack was fully configured and validated:
+
+* Spring Boot Actuator exposed metrics through `/actuator/prometheus`.
+* Prometheus successfully collected metrics (`health: up`).
+* Grafana successfully connected to Prometheus and was operational.
