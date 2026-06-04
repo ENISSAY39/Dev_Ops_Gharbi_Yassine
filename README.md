@@ -570,3 +570,284 @@ PostgreSQL Database
 
 Using the `docker_container` module allows infrastructure and application deployment to be fully automated and reproducible through Ansible.
 
+
+
+## Bonus graphana 
+
+
+## Objective
+
+The application has been monitored using a modern observability stack based on:
+
+* Spring Boot Actuator
+* Micrometer
+* Prometheus
+* Grafana
+
+The goal is to expose application metrics, collect them automatically and visualize them through dashboards.
+
+---
+
+## 1. Spring Boot Actuator
+
+### Dependencies
+
+The following dependencies were added to the backend application:
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-prometheus</artifactId>
+</dependency>
+```
+
+### Configuration
+
+The following configuration was added to `application.yml`:
+
+```yaml
+management:
+  server:
+    add-application-context-header: false
+
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env,metrics,beans,configprops,prometheus
+
+  endpoint:
+    health:
+      show-details: always
+```
+
+---
+
+## 2. Prometheus Metrics Endpoint
+
+Once the application is deployed, Spring Boot exposes metrics through:
+
+```text
+/actuator/prometheus
+```
+
+Verification command:
+
+```bash
+wget -qO- http://localhost:8080/actuator/prometheus | head -20
+```
+
+result:
+
+```text
+admin@ip-10-0-1-208:~$ sudo docker exec -it simpleapi sh
+/opt/myapp # wget -qO- http://localhost:8080/actuator/prometheus | head -20
+# HELP application_ready_time_seconds Time taken for the application to be ready to service requests
+# TYPE application_ready_time_seconds gauge
+application_ready_time_seconds{main_application_class="fr.takima.training.simpleapi.SimpleApiApplication"} 17.099
+# HELP application_started_time_seconds Time taken to start the application
+# TYPE application_started_time_seconds gauge
+application_started_time_seconds{main_application_class="fr.takima.training.simpleapi.SimpleApiApplication"} 16.891
+# HELP disk_free_bytes Usable space for path
+# TYPE disk_free_bytes gauge
+disk_free_bytes{path="/opt/myapp/."} 8.73721856E8
+# HELP disk_total_bytes Total space for path
+# TYPE disk_total_bytes gauge
+disk_total_bytes{path="/opt/myapp/."} 8.217726976E9
+# HELP executor_active_threads The approximate number of threads that are actively executing tasks
+# TYPE executor_active_threads gauge
+executor_active_threads{name="applicationTaskExecutor"} 0.0
+# HELP executor_completed_tasks_total The approximate total number of tasks that have completed execution
+# TYPE executor_completed_tasks_total counter
+executor_completed_tasks_total{name="applicationTaskExecutor"} 0.0
+# HELP executor_pool_core_threads The core number of threads for the pool
+# TYPE executor_pool_core_threads gauge
+```
+
+This confirms that Micrometer successfully exports metrics in Prometheus format.
+
+---
+
+## 3. Prometheus Deployment
+
+### Configuration file
+
+File: `prometheus.yml`
+
+```yaml
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'simpleapi'
+    metrics_path: '/actuator/prometheus'
+
+    static_configs:
+      - targets: ['simpleapi:8080']
+```
+
+### Run Prometheus
+
+```bash
+docker run -d \
+  --name prometheus \
+  --network back-network \
+  -p 9090:9090 \
+  -v /home/admin/prometheus.yml:/etc/prometheus/prometheus.yml \
+  prom/prometheus
+```
+
+---
+
+## 4. Prometheus Validation
+
+Check that Prometheus is running:
+
+```bash
+curl localhost:9090
+```
+
+Result:
+
+```html
+<a href="/query">Found</a>.
+```
+
+Check scrape targets:
+
+```bash
+curl http://localhost:9090/api/v1/targets
+```
+
+Result:
+
+```json
+"health":"up"
+```
+
+This confirms that Prometheus successfully scrapes the Spring Boot application.
+
+---
+
+## 5. Grafana Deployment
+
+Run Grafana:
+
+```bash
+docker run -d \
+  --name grafana \
+  --network back-network \
+  -p 3000:3000 \
+  grafana/grafana
+```
+
+Verification:
+
+```bash
+curl localhost:3000
+```
+
+Result:
+
+```html
+<a href="/login">Found</a>.
+```
+
+Default credentials:
+
+```text
+Username: admin
+Password: admin
+```
+
+---
+
+## 6. Architecture
+
+```text
+Spring Boot Application
+        │
+        ▼
+Spring Boot Actuator
+        │
+        ▼
+/actuator/prometheus
+        │
+        ▼
+Prometheus
+        │
+        ▼
+Grafana
+```
+
+---
+
+## 7. Monitoring Features
+
+The monitoring stack provides:
+
+* JVM memory usage
+* CPU usage
+* Application startup time
+* Thread metrics
+* Executor metrics
+* HTTP metrics
+* Disk usage
+* Health indicators
+
+---
+
+## 8. Validation Results
+
+The monitoring stack was successfully validated:
+
+### Actuator
+
+```bash
+wget -qO- http://localhost:8080/actuator
+```
+
+Prometheus endpoint available:
+
+```json
+"prometheus":{"href":"http://localhost:8080/actuator/prometheus"}
+```
+
+### Prometheus Endpoint
+
+```bash
+wget -qO- http://localhost:8080/actuator/prometheus
+```
+
+Metrics successfully returned.
+
+### Prometheus Target
+
+```bash
+curl http://localhost:9090/api/v1/targets
+```
+
+Result:
+
+```json
+"health":"up"
+```
+
+This confirms that Prometheus successfully collects metrics from the application.
+
+
+
+
+
+
+admin@ip-10-0-1-208:~$ sudo dmesg -T | grep -i -E "killed process|out of memory|oom"
+[Thu Jun  4 06:45:13 2026] systemd invoked oom-killer: gfp_mask=0x140cca(GFP_HIGHUSER_MOVABLE|__GFP_COMP), order=0, oom_score_adj=0
+[Thu Jun  4 06:45:13 2026]  oom_kill_process.cold+0xb/0x10
+[Thu Jun  4 06:45:13 2026] [  pid  ]   uid  tgid total_vm      rss pgtables_bytes swapents oom_score_adj name
+[Thu Jun  4 06:45:13 2026] oom-kill:constraint=CONSTRAINT_NONE,nodemask=(null),cpuset=init.scope,mems_allowed=0,global_oom,task_memcg=/system.slice/docker-80f376d3b62b871b9d07ff59217a77c350fb30019af83b141fab0209b8c22f15.scope,task=java,pid=56720,uid=0
+[Thu Jun  4 06:45:14 2026] Out of memory: Killed process 56720 (java) total-vm:1917040kB, anon-rss:249788kB, file-rss:0kB, shmem-rss:0kB, UID:0 pgtables:736kB oom_score_adj:0
+admin@ip-10-0-1-208:~$
