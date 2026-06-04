@@ -900,3 +900,23 @@ Despite these infrastructure limitations, the monitoring stack was fully configu
 * Spring Boot Actuator exposed metrics through `/actuator/prometheus`.
 * Prometheus successfully collected metrics (`health: up`).
 * Grafana successfully connected to Prometheus and was operational.
+
+### Load Balancing
+
+Two backend instances (`backend-1` and `backend-2`) were successfully deployed and verified individually. Both instances responded correctly on their dedicated ports and were able to connect to the PostgreSQL database.
+
+The next step was to configure Apache HTTP Server with `mod_proxy_balancer` in order to distribute requests between the two backend instances.
+
+The Apache configuration template (`httpd.conf.template`) was updated to enable the required load-balancing modules and define a balancer cluster.
+
+However, during deployment, the EC2 instance became unreachable through SSH. The deployment pipeline failed with the following error:
+
+```text
+Failed to connect to the host via ssh:
+Connection timed out during banner exchange
+Connection to <server-ip> port 22 timed out
+```
+
+After this incident, direct SSH access to the VM was no longer possible, preventing further deployment, testing, and validation of the load-balancing configuration.
+
+As a result, the load-balancing configuration was prepared but could not be fully deployed and validated on the production environment.
