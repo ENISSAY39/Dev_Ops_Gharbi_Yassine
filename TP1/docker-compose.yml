@@ -16,15 +16,16 @@ services:
     networks:
       - back-network
 
-  backend:
+  backend-1:
     build: ./simple-api-student
-    container_name: simpleapi
+    container_name: backend-1
     restart: unless-stopped
 
     environment:
       SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      INSTANCE_NAME: backend-1
 
     depends_on:
       - database
@@ -33,19 +34,48 @@ services:
       - front-network
       - back-network
 
+  backend-2:
+    build: ./simple-api-student
+    container_name: backend-2
+    restart: unless-stopped
+
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      INSTANCE_NAME: backend-2
+
+    depends_on:
+      - database
+
+    networks:
+      - front-network
+      - back-network
+
+  front:
+    build: ./front
+    container_name: front
+    restart: unless-stopped
+
+    depends_on:
+      - backend-1
+      - backend-2
+
+    networks:
+      - front-network
+
   httpd:
     build: ./http-server
     container_name: apache
-
-    environment:
-      BACKEND_HOST: ${BACKEND_HOST}
-      BACKEND_PORT: ${BACKEND_PORT}
+    restart: unless-stopped
 
     ports:
       - "80:80"
 
     depends_on:
-      - backend
+      - front
+      - backend-1
+      - backend-2
 
     networks:
       - front-network

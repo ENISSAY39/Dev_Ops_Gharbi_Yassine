@@ -903,20 +903,42 @@ Despite these infrastructure limitations, the monitoring stack was fully configu
 
 ### Load Balancing
 
-Two backend instances (`backend-1` and `backend-2`) were successfully deployed and verified individually. Both instances responded correctly on their dedicated ports and were able to connect to the PostgreSQL database.
 
-The next step was to configure Apache HTTP Server with `mod_proxy_balancer` in order to distribute requests between the two backend instances.
 
-The Apache configuration template (`httpd.conf.template`) was updated to enable the required load-balancing modules and define a balancer cluster.
 
-However, during deployment, the EC2 instance became unreachable through SSH. The deployment pipeline failed with the following error:
+
+
+To provide redundancy, the application was deployed with two backend instances: `backend-1` and `backend-2`.
+
+Apache was configured with `mod_proxy_balancer` and the `byrequests` load-balancing algorithm:
+
+```apache
+<Proxy "balancer://backendcluster">
+    BalancerMember "http://backend-1:8080"
+    BalancerMember "http://backend-2:8080"
+    ProxySet lbmethod=byrequests
+</Proxy>
+````
+
+To validate the configuration, a dedicated endpoint `/instance` was added. Each backend instance exposes its own identifier through the environment variable `INSTANCE_NAME`.
+
+Repeated requests to `http://localhost/api/instance` returned alternating responses:
 
 ```text
-Failed to connect to the host via ssh:
-Connection timed out during banner exchange
-Connection to <server-ip> port 22 timed out
+backend-1
+backend-2
+backend-1
+backend-2
+backend-1
+backend-2
 ```
 
-After this incident, direct SSH access to the VM was no longer possible, preventing further deployment, testing, and validation of the load-balancing configuration.
+This demonstrates that Apache correctly distributes incoming requests between the two backend instances. Screenshots below show that refreshing the same URL alternately reaches `backend-1` and `backend-2`, confirming that load balancing is operational.
 
-As a result, the load-balancing configuration was prepared but could not be fully deployed and validated on the production environment.
+```
+
+Et juste en dessous :
+
+![alt text](load_balancing.png)
+
+
